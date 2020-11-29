@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Movie>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h2>Movies List</h2>
+    @if (Model == null || Model.Count() < 1)
+    {
+        <div class="alert-warning">No Movies Available</div>
+        <div class="alert-danger">@ViewBag.Error</div>
+        
+   }
+    else
+    {
+
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>
+                        Title
+                    </th>
+                    <th>
+                        Genre
+                    </th>
+                    <th>
+                        Release Date
+                    </th>
+                </tr>
+            </thead>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Genre</td>
+                    <td>@item.ReleaseDate.ToString("yyyy MMMM")</td>
+                </tr>
+            }
+
+        </table>
+    }
+    <a asp-action="Create" asp-controller="Movie">Create New</a>
+</div>
