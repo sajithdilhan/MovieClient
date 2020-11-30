@@ -33,16 +33,25 @@ namespace MovieClient.Controllers
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string token = await GetJWTToken();
-
-                HttpResponseMessage response = await httpClient.GetAsync("api/movies");
-                if (response.IsSuccessStatusCode)
+                if (!string.IsNullOrEmpty(token))
                 {
-                    movies = await response.Content.ReadAsAsync<List<Movie>>();
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    HttpResponseMessage response = await httpClient.GetAsync("api/movies");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        movies = await response.Content.ReadAsAsync<List<Movie>>();
+                    }
+                    else
+                    {
+                        ViewBag.Error = response.ReasonPhrase;
+                    }
+
                 }
                 else
                 {
-                    ViewBag.Error = response.ReasonPhrase;
+                    ViewBag.Error = "Authentication failed!";
                 }
+
             }
 
 
@@ -88,10 +97,31 @@ namespace MovieClient.Controllers
                 httpClient.DefaultRequestHeaders.Accept.Clear();
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 var content = new StringContent(JsonConvert.SerializeObject(movie).ToString(), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await httpClient.PostAsync("api/movies", content);
-            }
 
-            return RedirectToAction("Index");
+                string token = await GetJWTToken();
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    HttpResponseMessage response = await httpClient.PostAsync("api/movies", content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        ViewBag.Error = response.ReasonPhrase;
+                        return View();
+                    }
+
+                }
+                else
+                {
+                    ViewBag.Error = "Authentication failed!";
+                }
+
+                return View();
+            }
         }
     }
 }
